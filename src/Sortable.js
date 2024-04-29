@@ -1793,10 +1793,17 @@ function _ghostIsFirst(evt, vertical, sortable) {
 	let firstElRect = getRect(getChild(sortable.el, 0, sortable.options, true));
 	const childContainingRect = getChildContainingRectFromElement(sortable.el, sortable.options, ghostEl);
 	const spacer = 10;
+	
+	// (direction === rtl) XOR (flex-direction === rtl)
+	const rtl = (css(sortable.el, 'direction') === 'rtl') !== (css(sortable.el, 'flex-direction') === 'row-reverse');
 
-	return vertical ?
-		(evt.clientX < childContainingRect.left - spacer || evt.clientY < firstElRect.top && evt.clientX < firstElRect.right) :
-		(evt.clientY < childContainingRect.top - spacer || evt.clientY < firstElRect.bottom && evt.clientX < firstElRect.left)
+	if (vertical) {
+		return (evt.clientX < childContainingRect.left - spacer || evt.clientY < firstElRect.top && evt.clientX < firstElRect.right)
+	} else if (!rtl) {
+		return (evt.clientY < childContainingRect.top - spacer || evt.clientY < firstElRect.bottom && evt.clientX < firstElRect.left)
+	} else {
+		return (evt.clientY < childContainingRect.top - spacer || evt.clientY < firstElRect.bottom && evt.clientX > firstElRect.right)
+	}
 }
 
 function _ghostIsLast(evt, vertical, sortable) {
@@ -1804,9 +1811,16 @@ function _ghostIsLast(evt, vertical, sortable) {
 	const childContainingRect = getChildContainingRectFromElement(sortable.el, sortable.options, ghostEl);
 	const spacer = 10;
 
-	return vertical ?
-		(evt.clientX > childContainingRect.right + spacer || evt.clientY > lastElRect.bottom && evt.clientX > lastElRect.left) :
-		(evt.clientY > childContainingRect.bottom + spacer || evt.clientX > lastElRect.right && evt.clientY > lastElRect.top);
+	// (direction === rtl) XOR (flex-direction === rtl)
+	const rtl = (css(sortable.el, 'direction') === 'rtl') !== (css(sortable.el, 'flex-direction') === 'row-reverse');
+	
+	if (vertical) {
+		return (evt.clientX > childContainingRect.right + spacer || evt.clientY > lastElRect.bottom && evt.clientX > lastElRect.left)
+	} else if (!rtl) {
+		return (evt.clientY > childContainingRect.bottom + spacer || evt.clientX > lastElRect.right && evt.clientY > lastElRect.top)
+	} else {
+		return (evt.clientY > childContainingRect.bottom + spacer || evt.clientX < lastElRect.left && evt.clientY > lastElRect.top)
+	}
 }
 
 function _getSwapDirection(evt, target, targetRect, vertical, swapThreshold, invertedSwapThreshold, invertSwap, isLastTarget) {
